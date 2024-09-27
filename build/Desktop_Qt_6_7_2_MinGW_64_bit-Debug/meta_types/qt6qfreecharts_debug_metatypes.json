@@ -1,0 +1,43 @@
+[
+    {
+        "classes": [
+            {
+                "className": "FreeChart",
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "y",
+                                "type": "qreal"
+                            }
+                        ],
+                        "name": "addPoint",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "points",
+                                "type": "QVariantList"
+                            }
+                        ],
+                        "name": "replaceSeries",
+                        "returnType": "void"
+                    }
+                ],
+                "object": true,
+                "qualifiedClassName": "FreeChart",
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QQuickItem"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "FreeChart.h",
+        "outputRevision": 68
+    }
+]

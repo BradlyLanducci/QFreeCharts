@@ -1,0 +1,5 @@
+module QFreeCharts
+typeinfo QFreeCharts.qmltypes
+prefer :/qt/qml/QFreeCharts/
+Main 1.0 Main.qml
+

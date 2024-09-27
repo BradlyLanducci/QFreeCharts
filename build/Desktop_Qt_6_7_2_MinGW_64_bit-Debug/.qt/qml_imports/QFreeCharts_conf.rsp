@@ -1,0 +1,14 @@
+-rootPath
+C:/Users/Bradly/qt_projects/QFreeCharts
+-cmake-output
+-output-file
+C:/Users/Bradly/qt_projects/QFreeCharts/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/.qt/qml_imports/QFreeCharts_conf.cmake
+-importPath
+C:/Users/Bradly/qt_projects/QFreeCharts/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/QFreeCharts
+-importPath
+C:/Users/Bradly/qt_projects/QFreeCharts/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug
+-importPath
+C:/Qt/6.7.2/mingw_64/./qml
+-qrcFiles
+C:/Users/Bradly/qt_projects/QFreeCharts/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/.qt/rcc/qmake_QFreeCharts.qrc
+C:/Users/Bradly/qt_projects/QFreeCharts/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/.qt/rcc/QFreeCharts_raw_qml_0.qrc

@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/QFreeCharts/">
+    <file alias="Main.qml">C:/Users/Bradly/qt_projects/QFreeCharts/Main.qml</file>
+  </qresource>
+</RCC>
+

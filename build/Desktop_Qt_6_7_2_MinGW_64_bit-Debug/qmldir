@@ -1,0 +1,8 @@
+module QFreeCharts
+linktarget appQFreeChartsplugin
+optional plugin appQFreeChartsplugin
+classname QFreeChartsPlugin
+typeinfo appQFreeCharts.qmltypes
+prefer :/qt/qml/QFreeCharts/
+Main 1.0 Main.qml
+
