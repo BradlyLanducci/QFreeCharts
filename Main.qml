@@ -26,5 +26,7 @@ Window {
         id: freeChart
 
         anchors.fill: parent
+
+        antialiasing: true
     }
 }

@@ -2,6 +2,7 @@
 
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QPair>
 #include <QSGFlatColorMaterial>
 #include <QSGGeometryNode>
 
@@ -26,23 +27,20 @@ FreeChart::FreeChart(QQuickItem* parent)
 			{
 				uint64_t begin = now();
 				QVariantList points;
-				double frequencyX = 0.1;	// Adjust this for the X frequency
-				double frequencyY = 0.15; // Adjust this for the Y frequency
-				double amplitudeX = 1.0;	// Adjust this for the X amplitude
-				double amplitudeY = 1.0;	// Adjust this for the Y amplitude
-				double dphase = M_PI / 4; // Phase difference between X and Y
+				double frequency = 0.1f; // Adjust this for the wave frequency
+				double amplitude = 1.0;	 // Adjust this for the wave amplitude
 
-				// Generate points for a Lissajous curve
+				// Generate points for a sine wave
 				for (qsizetype i = 0; i < 50; i++)
 				{
-					double t = i * frequencyX;									 // Time or parameter
-					double x = amplitudeX * sin(2 * t + dphase); // X-coordinate
-					double y = amplitudeY * sin(3 * t);					 // Y-coordinate
-					points.append((y + 1.0) / 2.0);							 // Append the point
+					double x = i * frequency + phase;		// Adjust the frequency for speed
+					double y = amplitude * std::sin(x); // Calculate sine value
+					// points.append((y + 1.f) / 2.f);
+					points.append(dis(gen));
 				}
 
 				// Update the phase for the next update (to create movement)
-				phase += 0.01; // Increment the phase to shift the sine wave over tim
+				phase += 0.1; // Increment the phase to shift the sine wave over tim
 
 				replaceSeries(points);
 				uint64_t end = now();
@@ -93,11 +91,12 @@ QSGNode* FreeChart::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updat
 	qsizetype pointsSize = m_points.size();
 
 	// temp
-	const int numCircleSegments = 10;
+	const int numCircleSegments = 12;
 	const int numCircleVertices = numCircleSegments * 3;
 	const int numRectangleVertices = 6;
 
-	const int totalVerticesPerPoint = numCircleVertices + numRectangleVertices;
+	const int totalVerticesPerPoint =
+			numCircleVertices + numRectangleVertices + 3; // Number of circle triangles + rectangle + last triangle for circle
 
 	if (pointsSize != 0)
 	{
@@ -124,78 +123,99 @@ QSGNode* FreeChart::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updat
 
 		QSGGeometry::Point2D* vertices = geometry->vertexDataAsPoint2D();
 
+		// We are filling this space, so we scale the x axis by the amount of points
 		float xWidth = width() / (pointsSize - 1);
-
-		if (QOpenGLContext::currentContext())
-		{
-			QOpenGLFunctions* functions = QOpenGLContext::currentContext()->functions();
-			functions->glEnable(GL_BLEND);
-			functions->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Standard blending mode
-			functions->glEnable(GL_MULTISAMPLE);
-		}
 
 		for (int i = 0; i < pointsSize - 1; i++)
 		{
+			// p1 (x_i)
 			double x1 = i * xWidth;
 			double y1 = m_points[i].toDouble() * height();
 
+			// p2 (x_i+1)
 			double x2 = (i + 1) * xWidth;
 			double y2 = m_points[i + 1].toFloat() * height();
 
 			// Series line thickness
-			double lineWidth = 10.0;
+			double lineWidth = 2.0;
 
-			double diagnol = std::sqrt(std::pow(x2 - x1, 2.0) + std::pow(y2 - y1, 2.0));
+			// Line length connecting p1 and p2
+			double diagonal = std::sqrt(std::pow(x2 - x1, 2.0) + std::pow(y2 - y1, 2.0));
 
 			// Half of rectangles "height"
-			double hypotenuse = lineWidth / 2.0;
+			double hypotenuse = lineWidth / 2;
 			// Angle of rotation from xi to xi+1
-			double theta = std::acos((x2 - x1) / diagnol);
+			double theta = std::acos((x2 - x1) / diagonal);
 
 			// Adjacent
 			double s1 = hypotenuse * std::sin(theta);
 			// Opposite
 			double s2 = hypotenuse * std::cos(theta);
 
+			// For indexing into vertices
 			int verticeIndex = i * totalVerticesPerPoint;
 
-			// s1 = std::clamp(s1, 1.0, s1);
-			// s2 = std::clamp(s2, 1.0, s2);
-
-			// s1 = lineWidth;
-			// s2 = lineWidth;
-
-			// qDebug() << "s1" << s1 << "s2" << s2;
+			// Flip when the rectangle is going up (y axis is flipped in gui)
+			if (y1 > y2)
+			{
+				s2 = -s2;
+			}
 
 			// Top left
-			double v1x = std::round(x1 - s1);
-			double v1y = std::round(y1 + s2);
+			double v1x = x1 - s1;
+			double v1y = y1 + s2;
 			// Bottom left
-			double v2x = std::round(x1 + s1);
-			double v2y = std::round(y1 - s2);
+			double v2x = x1 + s1;
+			double v2y = y1 - s2;
 			// Top right
-			double v3x = std::round(x2 - s1);
-			double v3y = std::round(y2 + s2);
+			double v3x = x2 - s1;
+			double v3y = y2 + s2;
 			// Bottom right
-			double v4x = std::round(x2 + s1);
-			double v4y = std::round(y2 - s2);
+			double v4x = x2 + s1;
+			double v4y = y2 - s2;
 
-			// vertices[verticeIndex].set(v3x, v3y);
-			// vertices[verticeIndex + 1].set(v4x, v4y);
-			// vertices[verticeIndex + 2].set(v1x, v1y);
-			// vertices[verticeIndex + 3].set(v4x, v4y);
-			// vertices[verticeIndex + 4].set(v2x, v2y);
-			// vertices[verticeIndex + 5].set(v1x, v1y);
-
+			// Drawn in this specific order to end up with vertice on the correct side of the rectangle
 			vertices[verticeIndex].set(v1x, v1y);
 			vertices[verticeIndex + 1].set(v2x, v2y);
 			vertices[verticeIndex + 2].set(v3x, v3y);
-			vertices[verticeIndex + 3].set(v2x, v2y);
-			vertices[verticeIndex + 4].set(v4x, v4y);
+			vertices[verticeIndex + 3].set(v4x, v4y);
+			vertices[verticeIndex + 4].set(v2x, v2y);
 			vertices[verticeIndex + 5].set(v3x, v3y);
 
-			// set back to origin to draw circle
-			vertices[verticeIndex + 6].set(x2, y2);
+			// Create circle connecting rectangles, we need 1 extra segment due to it needing to finish connecting the circle
+			// together
+			std::vector<QPair<double, double>> circlePoints(numCircleSegments + 1);
+			const double circleRadius = hypotenuse;
+			std::size_t index = 0;
+			for (auto& circlePoint : circlePoints)
+			{
+				double angle = 2.0 * M_PI * static_cast<double>(index) / static_cast<double>(numCircleSegments);
+
+				circlePoint.first = circleRadius * std::cos(angle);
+				circlePoint.second = circleRadius * std::sin(angle);
+
+				index++;
+			}
+
+			// set to circle origin
+			double originX = x2;
+			double originY = y2;
+
+			// Would rather name this something else for cleaner code
+			index = 0;
+			for (int j = 6; j < totalVerticesPerPoint; j += 3)
+			{
+				// Draw segment of triangle
+				vertices[verticeIndex + j].set(originX, originY);
+				vertices[verticeIndex + j + 1].set(originX + circlePoints[index].first, originY + circlePoints[index].second);
+				vertices[verticeIndex + j + 2].set(originX + circlePoints[index + 1].first,
+																					 originY + circlePoints[index + 1].second);
+
+				index++;
+			}
+
+			// Return to x_i+1 in preparation for next iteration
+			vertices[verticeIndex + totalVerticesPerPoint].set(originX, originY);
 		}
 
 		node->markDirty(QSGNode::DirtyGeometry);
