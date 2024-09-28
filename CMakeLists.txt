@@ -9,15 +9,17 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Quick)
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(QFreeCharts
-    main.cpp
+    source/main.cpp
 )
 
 qt_add_qml_module(QFreeCharts
     URI QFreeCharts
     VERSION 1.0
     QML_FILES
-        Main.qml
-        SOURCES FreeChart.h FreeChart.cpp
+        source/Main.qml
+        SOURCES 
+            source/FreeChart.h 
+            source/FreeChart.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
