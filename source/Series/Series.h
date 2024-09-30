@@ -1,17 +1,21 @@
 #pragma once
 
+#include <QFile>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
 #include <QQuickItem>
 #include <QTimer>
 #include <random>
 
 //----------------------------------------------------------------------------------------------------------------------------------//
 
-class FreeChart : public QQuickItem
+class Series : public QQuickItem
 {
 	Q_OBJECT
 public:
-	explicit FreeChart(QQuickItem* parent = nullptr);
-	~FreeChart();
+	explicit Series(QQuickItem* parent = nullptr);
+	~Series();
 
 	Q_INVOKABLE void addPoint(qreal y);
 	Q_INVOKABLE void replaceSeries(QVariantList points);

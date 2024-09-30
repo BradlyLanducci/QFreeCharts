@@ -3,7 +3,7 @@
 
 #include <QSurfaceFormat>
 
-#include "FreeChart.h"
+#include "Series/Series.h"
 
 int main(int argc, char* argv[])
 {
@@ -14,13 +14,16 @@ int main(int argc, char* argv[])
 	QGuiApplication app(argc, argv);
 
 	QQmlApplicationEngine engine;
+
+	qmlRegisterType<Series>("Series", 1.0, 0.0, "Series");
+
+	const QUrl url(QStringLiteral("qrc:/Qml/Main.qml"));
+
 	QObject::connect(
 			&engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit(-1); },
 			Qt::QueuedConnection);
 
-	qmlRegisterType<FreeChart>("FreeChart", 1.0, 0.0, "FreeChart");
-
-	engine.loadFromModule("QFreeCharts", "Main");
+	engine.load(url);
 
 	return app.exec();
 }

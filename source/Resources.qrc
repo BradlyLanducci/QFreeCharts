@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Qml/Main.qml</file>
+        <file>Shaders/Rotation.vert</file>
+        <file>Shaders/Rotation.frag</file>
+        <file>Shaders/Rotation.vert.qsb</file>
+        <file>Shaders/Rotation.frag.qsb</file>
+    </qresource>
+</RCC>

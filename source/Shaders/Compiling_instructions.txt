@@ -1,0 +1,4 @@
+GLSL shaders must be compiled with qsb as serialized shaders.
+
+qsb --glsl "100 es,120,150" --hlsl 50 --msl 12 -o Rotation.vert.qsb Rotation.vert
+qsb --glsl "100 es,120,150" --hlsl 50 --msl 12 -o Rotation.frag.qsb Rotation.frag

@@ -3,23 +3,44 @@ cmake_minimum_required(VERSION 3.16)
 project(QFreeCharts VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
-qt_add_executable(QFreeCharts
+set(sources
+    source/Resources.qrc
     source/main.cpp
 )
 
-qt_add_qml_module(QFreeCharts
-    URI QFreeCharts
+qt_add_executable(${PROJECT_NAME}
+    ${sources}
+)
+
+qt_add_qml_module(${PROJECT_NAME}
+    URI ${PROJECT_NAME}
     VERSION 1.0
+
+    SOURCES
+        source/Series/Series.h
+        source/Series/Series.cpp
+        source/Shaders/RotationShader.h
+        source/Shaders/RotationShader.cpp
+        source/Shaders/RotationMaterial.h
+        source/Shaders/RotationMaterial.cpp
+        source/Shaders/RotationNode.h
+        source/Shaders/RotationNode.cpp
+
+
     QML_FILES
-        source/Main.qml
-        SOURCES 
-            source/FreeChart.h 
-            source/FreeChart.cpp
+        source/Qml/Main.qml
+
+    RESOURCES
+        source/Shaders/Rotation.vert
+        source/Shaders/Rotation.frag
+        source/Shaders/Rotation.vert.qsb
+        source/Shaders/Rotation.frag.qsb
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
