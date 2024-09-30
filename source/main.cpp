@@ -7,9 +7,9 @@
 
 int main(int argc, char* argv[])
 {
-	// QSurfaceFormat format;
-	// format.setSamples(4);
-	// QSurfaceFormat::setDefaultFormat(format);
+	QSurfaceFormat format;
+	format.setSamples(4);
+	QSurfaceFormat::setDefaultFormat(format);
 
 	QGuiApplication app(argc, argv);
 
