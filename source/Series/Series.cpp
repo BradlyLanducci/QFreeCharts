@@ -16,48 +16,18 @@ static inline uint64_t now()
 
 Series::Series(QQuickItem* parent)
 		: QQuickItem(parent)
+		, m_color("Black")
+		, m_lineWidth(1.f)
 {
-	mp_timer = new QTimer(this);
-	QObject::connect(
-			mp_timer, &QTimer::timeout, mp_timer,
-			[this]()
-			{
-				uint64_t begin = now();
-				QVariantList points;
-				float frequency = 0.1f; // Adjust this for the wave frequency
-				float amplitude = 1.0;	// Adjust this for the wave amplitude
-
-				// Generate points for a sine wave
-				for (qsizetype i = 0; i < 1000; i++)
-				{
-					float x = i * frequency + phase;	 // Adjust the frequency for speed
-					float y = amplitude * std::sin(x); // Calculate sine value
-					points.append((y + 1.f) / 2.f);
-					// points.append(dis(gen));
-				}
-
-				// Update the phase for the next update (to create movement)
-				phase += 0.1; // Increment the phase to shift the sine wave over time
-
-				replaceSeries(points);
-				uint64_t end = now();
-				// qDebug() << end - begin << "microseconds";
-			},
-			Qt::DirectConnection);
-
-	mp_timer->setInterval(5);
-	mp_timer->start();
-
 	setFlag(ItemHasContents, true);
+	setClip(true);
+
 	update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------//
 
-Series::~Series()
-{
-	mp_timer->stop();
-}
+Series::~Series() = default;
 
 //----------------------------------------------------------------------------------------------------------------------------------//
 
@@ -80,6 +50,34 @@ void Series::replaceSeries(QVariantList points)
 
 //----------------------------------------------------------------------------------------------------------------------------------//
 
+QColor Series::color() const
+{
+	return m_color;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------//
+
+float Series::lineWidth() const
+{
+	return m_lineWidth;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------//
+
+void Series::setColor(QColor color)
+{
+	m_color = color;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------//
+
+void Series::setLineWidth(float lineWidth)
+{
+	m_lineWidth = lineWidth;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------//
+
 QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData)
 {
 	RotationNode* node = nullptr;
@@ -93,7 +91,8 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 	{
 		if (!oldNode)
 		{
-			node = new RotationNode();
+			RGBA colorVector4d = QVector4D(m_color.redF(), m_color.greenF(), m_color.blueF(), m_color.alphaF());
+			node = new RotationNode(colorVector4d);
 
 			static QSGGeometry::Attribute attributes[] = {
 					QSGGeometry::Attribute::create(0, 2, QSGGeometry::FloatType, true), // Position
@@ -116,6 +115,7 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 			node = static_cast<RotationNode*>(oldNode);
 			geometry = node->geometry();
 			geometry->allocate(pointsSize * totalVerticesPerPoint);
+			node->setColor(m_color);
 		}
 
 		// Access raw vertex data
@@ -133,7 +133,7 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 			float y2 = m_points[i + 1].toFloat() * height();
 
 			// Line thickness
-			float lineWidth = 4.0;
+			float lineWidth = m_lineWidth;
 			float halfLineWidth = lineWidth / 2.0;
 
 			// Calculate rotation (theta) between points p1 and p2
@@ -152,73 +152,50 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 
 			float x2Modified = x1 + diagonal;
 
-			// Write vertex data (positions, theta, and center)
-			int verticeIndex = i * totalVerticesPerPoint *
-												 5; // 5 floats per vertex (x, y, theta, centerX, centerY) change center to be rotationXY
+			// Write vertex data (5 floats: positions, theta, and rotation point)
+			int verticeIndex = i * totalVerticesPerPoint * 5;
 
-			// Maybe set theta + rotation point programataically?
+			for (int i = 0; i < 40; i += 5)
+			{
+				vertexData[verticeIndex + i + 2] = theta;
+				vertexData[verticeIndex + i + 3] = x1;
+				vertexData[verticeIndex + i + 4] = y1;
+			}
+
+			// Draw vertices so that we end up on the right side of the rectangle
 			vertexData[verticeIndex] = x1;
 			vertexData[verticeIndex + 1] = y1 - halfLineWidth;
-			vertexData[verticeIndex + 2] = theta;
-			vertexData[verticeIndex + 3] = x1;
-			vertexData[verticeIndex + 4] = y1;
-
 			vertexData[verticeIndex + 5] = x1;
 			vertexData[verticeIndex + 6] = y1 + halfLineWidth;
-			vertexData[verticeIndex + 7] = theta;
-			vertexData[verticeIndex + 8] = x1;
-			vertexData[verticeIndex + 9] = y1;
-
 			vertexData[verticeIndex + 10] = x2Modified;
 			vertexData[verticeIndex + 11] = y1 - halfLineWidth;
-			vertexData[verticeIndex + 12] = theta;
-			vertexData[verticeIndex + 13] = x1;
-			vertexData[verticeIndex + 14] = y1;
-
 			vertexData[verticeIndex + 15] = x2Modified;
 			vertexData[verticeIndex + 16] = y1 + halfLineWidth;
-			vertexData[verticeIndex + 17] = theta;
-			vertexData[verticeIndex + 18] = x1;
-			vertexData[verticeIndex + 19] = y1;
-
 			vertexData[verticeIndex + 20] = x1;
 			vertexData[verticeIndex + 21] = y1 + halfLineWidth;
-			vertexData[verticeIndex + 22] = theta;
-			vertexData[verticeIndex + 23] = x1;
-			vertexData[verticeIndex + 24] = y1;
-
 			vertexData[verticeIndex + 25] = x2Modified;
 			vertexData[verticeIndex + 26] = y1 - halfLineWidth;
-			vertexData[verticeIndex + 27] = theta;
-			vertexData[verticeIndex + 28] = x1;
-			vertexData[verticeIndex + 29] = y1;
 
-			// Place circle within rest of vertices (need to modify total amount to reflect the (circle segments + 1) * 3
-			// extra vertices
-
-			// Construct circle at x2 unmodified
-			// Create circle connecting rectangles, we need 1 extra segment due to it needing to finish connecting the circle
-			// together
+			// Create circle connecting rectangles
 			std::vector<QPair<float, float>> circlePoints(numberOfCircleSegments + 1);
 			const float circleRadius = halfLineWidth;
-			std::size_t index = 0;
+			std::size_t circleIndex = 0;
 			for (auto& circlePoint : circlePoints)
 			{
-				float angle = 2.0 * M_PI * static_cast<float>(index) / static_cast<float>(numberOfCircleSegments);
+				float angle = 2.f * M_PI * static_cast<float>(circleIndex) / static_cast<float>(numberOfCircleSegments);
 
 				circlePoint.first = circleRadius * std::cos(angle);
 				circlePoint.second = circleRadius * std::sin(angle);
 
-				index++;
+				circleIndex++;
 			}
 
-			// set to circle origin
+			// Set to circle origin
 			float originX = x2;
 			float originY = y2;
 
-			// Would rather name this something else for cleaner code
-			index = 0;
-			for (int j = 40; j < totalVerticesPerPoint * 5; j += 15)
+			circleIndex = 0;
+			for (int j = 30; j < totalVerticesPerPoint * 5; j += 15)
 			{
 				// Draw segment of circle
 				vertexData[verticeIndex + j] = originX;
@@ -227,19 +204,19 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 				vertexData[verticeIndex + j + 3] = x2;
 				vertexData[verticeIndex + j + 4] = y2;
 
-				vertexData[verticeIndex + j + 5] = originX + circlePoints[index].first;
-				vertexData[verticeIndex + j + 6] = originY + circlePoints[index].second;
+				vertexData[verticeIndex + j + 5] = originX + circlePoints[circleIndex].first;
+				vertexData[verticeIndex + j + 6] = originY + circlePoints[circleIndex].second;
 				vertexData[verticeIndex + j + 7] = theta;
 				vertexData[verticeIndex + j + 8] = x2;
 				vertexData[verticeIndex + j + 9] = y2;
 
-				vertexData[verticeIndex + j + 10] = originX + circlePoints[index + 1].first;
-				vertexData[verticeIndex + j + 11] = originY + circlePoints[index + 1].second;
+				vertexData[verticeIndex + j + 10] = originX + circlePoints[circleIndex + 1].first;
+				vertexData[verticeIndex + j + 11] = originY + circlePoints[circleIndex + 1].second;
 				vertexData[verticeIndex + j + 12] = theta;
 				vertexData[verticeIndex + j + 13] = x2;
 				vertexData[verticeIndex + j + 14] = y2;
 
-				index++;
+				circleIndex++;
 			}
 
 			// Return to x_i+1 in preparation for next iteration

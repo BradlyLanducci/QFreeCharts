@@ -28,6 +28,7 @@ bool RotationShader::updateUniformData(RenderState& state, QSGMaterial* newMater
 	RotationMaterial* rotationMaterial = static_cast<RotationMaterial*>(newMaterial);
 	if (oldMaterial != newMaterial || rotationMaterial->uniforms.dirty)
 	{
+		memcpy(buf->data() + 64, &rotationMaterial->uniforms.color, 16);
 		rotationMaterial->uniforms.dirty = false;
 		changed = true;
 	}

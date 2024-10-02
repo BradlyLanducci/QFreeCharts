@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Shaders/RotationMaterial.h"
 #include <QFile>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -13,6 +14,10 @@
 class Series : public QQuickItem
 {
 	Q_OBJECT
+
+	Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged);
+	Q_PROPERTY(float lineWidth READ lineWidth WRITE setLineWidth NOTIFY lineWidthChanged)
+
 public:
 	explicit Series(QQuickItem* parent = nullptr);
 	~Series();
@@ -20,22 +25,25 @@ public:
 	Q_INVOKABLE void addPoint(qreal y);
 	Q_INVOKABLE void replaceSeries(QVariantList points);
 
+	QColor color() const;
+	float lineWidth() const;
+
 signals:
+	void colorChanged();
+	void lineWidthChanged();
 
 public slots:
+	void setColor(QColor color);
+	void setLineWidth(float lineWidth);
 
 protected:
 	QSGNode* updatePaintNode(QSGNode* oldNode, QQuickItem::UpdatePaintNodeData* updatePaintNodeData);
 
 private:
-	float phase{0.f};
 	QVariantList m_points;
 
-	QTimer* mp_timer;
-
-	std::random_device rd;
-	std::mt19937 gen{rd()}; // Mersenne Twister engine
-	std::uniform_real_distribution<float> dis{0.0, 1.0};
+	QColor m_color;
+	float m_lineWidth;
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------//

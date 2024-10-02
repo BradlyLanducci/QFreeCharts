@@ -6,6 +6,10 @@
 
 //----------------------------------------------------------------------------------------------------------------------------------//
 
+using RGBA = QVector4D;
+
+//----------------------------------------------------------------------------------------------------------------------------------//
+
 class RotationMaterial : public QSGMaterial
 {
 public:
@@ -19,8 +23,11 @@ public:
 		return new RotationShader();
 	}
 
+	void setColor(RGBA rgba);
+
 	struct
 	{
+		QVector4D color;
 		bool dirty;
 	} uniforms;
 };

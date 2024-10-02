@@ -35,6 +35,7 @@ qt_add_qml_module(${PROJECT_NAME}
 
     QML_FILES
         source/Qml/Main.qml
+        source/Qml/LineChart.qml
 
     RESOURCES
         source/Shaders/Rotation.vert

@@ -2,7 +2,12 @@
 
 layout(location = 0) out vec4 fragColor;
 
+layout(std140, binding = 0) uniform buf {
+    mat4 modelMatrix;
+    vec4 color;
+} ubuf;
+
 void main()
 {
-    fragColor = vec4(1.0, 0.5, 0.2, 1.0);  // Orange color for the rectangles
+    fragColor = ubuf.color;
 }

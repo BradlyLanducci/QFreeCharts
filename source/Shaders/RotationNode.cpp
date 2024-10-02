@@ -1,12 +1,11 @@
 #include "RotationNode.h"
 
-#include "RotationMaterial.h"
-
 //----------------------------------------------------------------------------------------------------------------------------------//
 
-RotationNode::RotationNode()
+RotationNode::RotationNode(RGBA color)
 {
 	auto* m = new RotationMaterial();
+	m->setColor(color);
 	setMaterial(m);
 	setFlag(OwnsMaterial, true);
 
@@ -33,6 +32,15 @@ void RotationNode::setGeometry(QSGGeometry* g)
 	QSGGeometryNode::setGeometry(g);
 
 	markDirty(QSGNode::DirtyGeometry);
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------//
+
+void RotationNode::setColor(const QColor color)
+{
+	RGBA colorVector4d = QVector4D(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+	RotationMaterial* m = static_cast<RotationMaterial*>(material());
+	m->setColor(colorVector4d);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------//
