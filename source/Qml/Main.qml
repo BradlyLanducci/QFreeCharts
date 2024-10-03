@@ -13,17 +13,18 @@ Window {
         id: lineChart
 
         anchors.fill: parent
+        anchors.margins: 5
 
         backgroundColor: "#564946"
 
         Series {
             color: "#558564"
-            lineWidth: 2
+            lineWidth: 4
         }
 
         Series {
             color: "#95f9e3"
-            lineWidth: 2
+            lineWidth: 1
         }
     }
 }

@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Export the targets of the library
+include("${CMAKE_CURRENT_LIST_DIR}/FreeChartsTargets.cmake")
+
+set(FREECHARTS_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include")
+
+# Optionally, set variables to help find the library in other projects
+set(FREECHARTS_LIBRARIES FreeCharts)
+
+# Provide a package hint for the library directory
+set(FREECHARTS_LIB_DIRS "@CMAKE_INSTALL_PREFIX@/lib")

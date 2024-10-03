@@ -21,6 +21,7 @@ Series::Series(QQuickItem* parent)
 {
 	setFlag(ItemHasContents, true);
 	setClip(true);
+	setAntialiasing(false);
 
 	update();
 }
@@ -99,6 +100,7 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 					QSGGeometry::Attribute::create(1, 1, QSGGeometry::FloatType),				// Theta
 					QSGGeometry::Attribute::create(2, 2, QSGGeometry::FloatType, true)	// rotationPoint
 			};
+
 			static QSGGeometry::AttributeSet set;
 			set.count = 3;
 			set.stride = 5 * sizeof(float);
@@ -126,11 +128,11 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 
 		for (int i = 0; i < pointsSize - 1; i++)
 		{
-			// Coordinates for p1 (x_i) and p2 (x_i+1)
+			// Coordinates for p1 (x_i) and p2 (x_i+1) and inverted y axis
 			float x1 = i * xWidth;
-			float y1 = m_points[i].toFloat() * height();
+			float y1 = (1.f - m_points[i].toFloat()) * height();
 			float x2 = (i + 1) * xWidth;
-			float y2 = m_points[i + 1].toFloat() * height();
+			float y2 = (1.f - m_points[i + 1].toFloat()) * height();
 
 			// Line thickness
 			float lineWidth = m_lineWidth;
@@ -144,7 +146,6 @@ QSGNode* Series::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePa
 			float theta = std::acos(w / diagonal);
 
 			// Theta is inverted when the point is going down
-			// Also maybe the whole y axis needs to be flipped
 			if (y2 > y1)
 			{
 				theta = -theta;
